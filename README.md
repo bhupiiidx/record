@@ -9,7 +9,7 @@ Features
   4. Download is available
   5. Preview is available
   6. Share (Comming Soon...)
-  7. Seperate Recording (Comming Soon...)
+  7. Seperate Recording for Audio and Video (Comming Soon...)
 
 
 [Visit Website](https://bhupiiidx.github.io/record/index.html)
