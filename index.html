@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+	<!-- Required meta tags -->
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<title>Screen Recorder</title>
+	<style type="text/css">* {margin: 0;padding: 0;box-sizing: border-box;text-decoration: none;list-style: none;}.mainNavbar {padding: 20px;font-size: 39px;display: flex;justify-content: center;background-color: #dc3545 !important;}.mainNavbar a {color: #fff !important;text-decoration: none;cursor: default;}.mainContainer {display: flex;flex-direction: column;align-items: center;justify-content: center;}.btn {margin: 20px;border-radius: 10px;padding: 10px 20px;transition: 0.3s linear;border: 2px solid red;cursor: pointer;text-decoration: none;box-shadow: -1px 0px 20px 0px #0000003b;}.btn-normal:hover, .btn-reverse {background: red;color: white;}.btn-normal, .btn-reverse:hover {background: white;color: red;}.btn:disabled {display: none}.videoContainer {margin-top: 100px;border: 30px solid rgba(33, 33, 33);width: 660px;height: 400px;border-radius: 60px;box-shadow: 7px 8px 20px 4px #0000004d;}.videoContainer svg, .videoContainer video {width: 100%;height: 100%;}.videoContainer video {border-radius: 30px;}@media(max-width: 700px) {.videoContainer {margin-top: 50px;width: 100%;}}@media(max-width: 400px) {.videoContainer {width: 100%;height: 350px;}}</style>
+</head>
+
+<body>
+
+	<nav class="mainNavbar">
+		<a href="javascript:void(0)">Recorder</a>
+	</nav>
+
+	<div class="mainContainer">
+		<div class="videoContainer">
+			<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1"
+				id="Layer_1" x="0px" y="0px" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;"
+				xml:space="preserve">
+				<path style="fill:#FFFFFF;"
+					d="M489.168,512H22.832C10.272,512,0,501.728,0,489.168V22.832C0,10.272,10.272,0,22.832,0H489.16  C501.728,0,512,10.272,512,22.832V489.16C512,501.728,501.728,512,489.168,512z" />
+				<circle style="fill:#303030;" cx="249.68" cy="256" r="184" />
+				<circle cx="256" cy="256" r="206.336" />
+				<circle cx="256" cy="256" r="184" />
+				<path style="fill:#999999;"
+					d="M256,443.248c-103.24,0-187.24-84-187.24-187.248c0-103.24,84-187.24,187.24-187.24  s187.24,84,187.24,187.24C443.24,359.248,359.24,443.248,256,443.248z M256,75.16c-99.712,0-180.84,81.128-180.84,180.84  c0,99.728,81.128,180.848,180.84,180.848S436.84,355.72,436.84,256S355.712,75.16,256,75.16z" />
+				<circle style="fill:#DB2B42;" cx="256" cy="256" r="68.4" />
+				<circle cx="40.4" cy="36.552" r="9.136" />
+				<g>
+					<circle style="fill:#AAAAAA;" cx="65.656" cy="36.552" r="9.136" />
+					<circle style="fill:#AAAAAA;" cx="90.904" cy="36.552" r="9.136" />
+				</g>
+				<circle style="fill:#DB2B42;" cx="40.528" cy="442.08" r="9.136" />
+				<circle style="fill:#AAAAAA;" cx="74.912" cy="442.08" r="9.136" />
+				<rect x="31.4" y="463.008" width="73.064" height="8.952" />
+				<g>
+					<polygon style="fill:#AAAAAA;"
+						points="351.248,367.184 335.176,356.704 424.448,219.784 424.448,53.416 443.648,53.416    443.648,225.488  " />
+					<polygon style="fill:#AAAAAA;"
+						points="397.08,296.952 340.144,384.176 321.416,346.544 355.088,294.96  " />
+				</g>
+				<polygon style="fill:#CCCBCA;"
+					points="334.416,372.672 340.144,384.176 443.648,225.488 443.648,53.416 434.048,53.416   434.048,219.784 " />
+				<circle style="fill:#AAAAAA;" cx="434.08" cy="64.64" r="37.208" />
+				<circle cx="434.08" cy="64.64" r="20.408" />
+				<g>
+				</g>
+				<g>
+				</g>
+				<g>
+				</g>
+				<g>
+				</g>
+				<g>
+				</g>
+				<g>
+				</g>
+				<g>
+				</g>
+				<g>
+				</g>
+				<g>
+				</g>
+				<g>
+				</g>
+				<g>
+				</g>
+				<g>
+				</g>
+				<g>
+				</g>
+				<g>
+				</g>
+				<g>
+				</g>
+			</svg>
+			<video class="video video-feedback" controls style="display: none;"></video>
+			<video class="video recorded-video" controls style="display: none;"></video>
+		</div>
+		<button class="btn btn-normal start-recording">Start Recording</button>
+		<button class="btn btn-reverse stop-recording" style="display: none;">Stop Recording</button>
+		<a href="javascript:void(0)" class="btn btn-normal download-video" style="display: none;">Download</a>
+	</div>
+
+	<script>
+		let stream = null,
+			audio = null,
+			mixedStream = null,
+			chunks = [],
+			recorder = null,
+			startButton = null,
+			stopButton = null,
+			downloadButton = null,
+			recordedVideo = null,
+			feedbackVideo = null;
+
+		async function setupStream() {
+			try {
+				stream = await navigator.mediaDevices.getDisplayMedia({
+					video: true
+				});
+
+				audio = await navigator.mediaDevices.getUserMedia({
+					audio: {
+						echoCancellation: true,
+						noiseSuppression: true,
+						sampleRate: 44100,
+					},
+				});
+
+				setupVideoFeedback();
+			} catch (err) {
+				console.error(err)
+			}
+		}
+
+		function setupVideoFeedback() {
+			if (stream) {
+				const video = document.querySelector('.video-feedback');
+				video.srcObject = stream;
+				video.play();
+			} else {
+				console.warn('No stream available');
+			}
+		}
+
+		async function startRecording() {
+			await setupStream();
+
+			if (stream && audio) {
+				mixedStream = new MediaStream([...stream.getTracks(), ...audio.getTracks()]);
+				recorder = new MediaRecorder(mixedStream);
+				recorder.ondataavailable = handleDataAvailable;
+				recorder.onstop = handleStop;
+				recorder.start(1000);
+
+				startButton.disabled = true;
+				stopButton.disabled = false;
+
+				console.log('Recording started');
+				feedbackVideo.style.display = "block"
+				stopButton.style.display = "block"
+				feedbackVideoSVG.style.display = "none"
+
+			} else {
+				console.warn('No stream available.');
+			}
+		}
+
+		function stopRecording() {
+			recorder.stop();
+
+			startButton.disabled = false;
+			stopButton.disabled = true;
+
+			feedbackVideo.style.display = "none"
+			recordedVideo.style.display = "block"
+			startButton.style.display = "none"
+			stopButton.style.display = "none"
+		}
+
+		function handleDataAvailable(e) {
+			chunks.push(e.data);
+		}
+
+		function handleStop(e) {
+			const blob = new Blob(chunks, { 'type': 'video/mp4' });
+			chunks = [];
+
+			downloadButton.href = URL.createObjectURL(blob);
+			downloadButton.download = 'video.mp4';
+			downloadButton.style.display = 'block';
+
+			recordedVideo.src = URL.createObjectURL(blob);
+			recordedVideo.load();
+			recordedVideo.onloadeddata = function () {
+				const rc = document.querySelector(".recorded-video-wrap");
+				rc.classList.remove("hidden");
+				rc.scrollIntoView({ behavior: "smooth", block: "start" });
+
+				recordedVideo.play();
+			}
+
+			stream.getTracks().forEach((track) => track.stop());
+			audio.getTracks().forEach((track) => track.stop());
+
+			console.log('Recording stopped');
+		}
+
+		window.addEventListener('load', () => {
+			startButton = document.querySelector('.start-recording');
+			stopButton = document.querySelector('.stop-recording');
+			downloadButton = document.querySelector('.download-video');
+			feedbackVideo = document.querySelector('.video-feedback');
+			feedbackVideoSVG = document.querySelector('.videoContainer svg');
+			recordedVideo = document.querySelector('.recorded-video');
+
+			startButton.addEventListener('click', startRecording);
+			stopButton.addEventListener('click', stopRecording);
+		})
+	</script>
+</body>
+
+</html>
